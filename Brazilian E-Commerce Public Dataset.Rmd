@@ -1,0 +1,209 @@
+---
+title: "Brazilian E-Commerce Public Dataset"
+author: "Prashant Wakchaure | Student No. 20200126"
+date: "19/12/2020"
+output: 
+  pdf_document:
+    fig_caption: yes
+    latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = 'pdf',echo = TRUE, fig.align="center", tidy = TRUE)
+```
+
+## Task 1: Analysis
+
+For this task, I went ahead and chose the "Brazilian E-Commerce Public Dataset by Olist" dataset from Kaggle:
+https://www.kaggle.com/olistbr/brazilian-ecommerce.
+It also suffices the minimum requirement of 2 categorical and 3 numerical variables. I'll perform various types of analysis on the dataset to infer out significant results in the forms of summaries, dataframes, tables and numerous plots. In the end, I'll also demonstrate the correlation between the numeric variables from the dataset.
+&nbsp;
+
+| **1.** **Read the data into R.**
+```{r 1-1, comment=NA, message= FALSE, warning=FALSE}
+comm <- read.csv("df.csv")
+```
+
+*** 
+
+| **2.** **See the dimensions of the dataset.**
+The dataset has 1,13,367 rows and 32 columns.
+```{r 2-1, comment=NA, message= FALSE, warning=FALSE}
+nrow(comm)
+ncol(comm)
+dim(comm)
+```
+
+*** 
+
+| **3.** **Check for null values.**
+There are no null values in the dataset.
+```{r 3-1, comment=NA, message= FALSE, warning=FALSE}
+is.null(comm)
+```
+
+*** 
+
+| **4.** **Evolution of E-Commerce in Brazil**
+We will firstly see how the E-commerce in Brazil has flourished over time (years) according to our dataset.
+```{r 4-1, comment=NA, message= FALSE, warning=FALSE}
+get_year <- as.POSIXct(comm$order_purchase_timestamp)
+get_year <- format(get_year, "%Y")
+head(get_year)
+
+flourished <- table(get_year)
+flourished
+
+barplot(flourished,xlab="Customers",ylab="Years",col="orange",horiz = TRUE,
+main="Evolution of E-Commerce in Brazil",border="red")
+
+plot(flourished,type = "o", col = "magenta", xlab = "Years", ylab = "Customers",
+   main = "Sudden rise of E-Commerce in Brazil")
+```
+*We see that there is a sudden rise after 2016 to 2017 and furthermore to 2018 in the E-Commerce in Brazil.*
+
+*** 
+
+| **5.** **Monthly progress of E-Commerce in Brazil**
+We will now see how the E-commerce in Brazil has flourished over time (months) according to our dataset.
+```{r 5-1, message=FALSE, warning=FALSE, comment=NA}
+get_month <- as.POSIXct(comm$order_purchase_timestamp)
+
+library(zoo)
+get_month <- as.yearmon(get_month, "%b%Y")
+head(get_month)
+
+flourished_months <- table(get_month)
+
+barplot(flourished_months,names.arg=unique(sort(get_month)),
+        las=2,cex.lab=1.2,
+        ylab="Customers",col="orange",
+        main="Monthly progress of E-Commerce in Brazil",
+        border="black")
+```
+*We see here that Nov 2017 has the highest number of customers, this might be due to Black Friday. And it is also evident that the customers in 2016 were very less. There is a significant distinguishment between the right and left side of Nov 2017.*
+
+*** 
+
+| **6.** **Day-wise distribution of E-Commerce in Brazil**
+We will now see how the E-commerce in Brazil has flourished over time (months) according to our dataset.
+```{r 6-1, message=FALSE, warning=FALSE, comment=NA}
+get_data <- as.POSIXct(comm$order_purchase_timestamp)
+get_day <- format(get_data, "%A")
+head(get_day)
+
+flourished_day <- table(get_day)
+
+barplot(flourished_day,names.arg=unique(sort(get_day)),
+        las=2,cex.lab=1.2,
+        ylab="Customers",col="yellow",
+        main="Day-wise distribution of E-Commerce in Brazil",
+        border="red")
+```
+*It is evident that the online shopping is done mostly on weekdays. The weekends are not that occupied for online shopping as people prefer to go out. So, the E-Commerce industry was not totally capitalized during that time. But now, it is completely the different case.*
+
+*** 
+
+| **7.** **The most popular categories**
+We will now see the most popular categories which are purchased by the customers.
+```{r 7-1, message=FALSE, warning=FALSE, comment=NA}
+pop_cat <- as.data.frame(table(comm$product_category_name_english))
+pop_cat_sort <- pop_cat[order(pop_cat$Freq,decreasing = TRUE),]
+pop_cat_sort <- pop_cat_sort[1:10,]
+pop_cat_sort
+
+barplot(pop_cat_sort$Freq,names.arg=pop_cat_sort$Var1,
+        las=2,cex.lab=1.2,
+        ylab="Customers",col="green",
+        main="The most popular categories",
+        border="blue")
+```
+*As we can see, the home accessories are purchased in abundance rather than any other products.*
+
+*** 
+
+| **8.** **Average price of each Category**
+Herein I calculated the average price of each Category to see the most costly category.
+```{r 8-1, message=FALSE, warning=FALSE, comment=NA}
+avg <- data.frame(comm$product_category_name_english, comm$price)
+
+colnames(avg) = c("Categories", "Price")
+avg <- avg[order(avg$Price,decreasing = TRUE),]
+
+x <- aggregate(.~Categories, data=avg, mean)
+x <- x[order(x$Price,decreasing = TRUE),]
+x
+
+barplot(x$Price,names.arg=x$Categories,las=2,cex.lab=1.2,ylab="Mean Price",col="pink",
+main="Average price of each Category",border="red")
+
+boxplot(x$Price,ylab = "Price", 
+        main = "Box Plot of the Average Price", col = "yellow")
+```
+*As evident from the graphs above, it is clear that the computers are the costliest & the home products are comparatively cheaper. That's the reason why the computers are not most popular categories, since the public tend to buy the cheaper products more.*
+
+*** 
+
+| **9.** **Most frequent type of Payment**
+Herein, I wanted to see the most frequent type of payment, so I plotted a pie chart for the same.
+```{r 9-1, message=FALSE, warning=FALSE, comment=NA}
+pop_cat <- as.data.frame(table(comm$payment_type))
+pop_cat
+
+piepercent<- round(100*pop_cat$Freq/sum(pop_cat$Freq), 1)
+pie(pop_cat$Freq,piepercent, main = "Most used type of Payment", col = rainbow(length(pop_cat$Freq)))
+legend("topright", c("Boleto","Credit Card","Debit Card","Voucher"), cex = 0.8,
+   fill = rainbow(length(pop_cat$Freq)))
+```
+*It is clearly evident that most of the customers use Credit Card, which is around 73.8% customers.*
+
+*** 
+
+| **10.** **Distribution of customers over the states**
+Herein, we see the no. of customers from each states in the given dataset.
+```{r 10-1, message=FALSE, warning=FALSE, comment=NA}
+
+most_cus <- as.data.frame(table(comm$customer_state))
+
+most_cus_sort <- most_cus[order(most_cus$Freq,decreasing = TRUE),]
+head(most_cus_sort)
+
+barplot(most_cus_sort$Freq,names.arg=most_cus_sort$Var1,
+        las=2,cex.lab=1.2,
+        ylab="Customers",col="lightblue",
+        main="Most customers from each State",
+        border="yellow")
+```
+*We see that Sao Paolo has the most customers in Brazil as it is the most famous city worldwide and is a cultural center of Brazil.*
+
+*** 
+
+| **11.** **Correlation between the numeric variables**
+Herein, I wanted to see the highest correlation between 2 variables, so firstly I plotted the correlation heatmap and then used some plots and other calculations to show which variables have the highest correlation.
+```{r 11-1, message=FALSE, warning=FALSE, comment=NA}
+
+x <- comm[, sapply(comm, class) == "numeric"]
+corr_mat <- round(cor(x),2)
+
+corrplot::corrplot(cor(x))
+
+fp_cor <- round(cor(comm$freight_value, comm$price),2)
+cat("The correlation between the freight value and item's price is",
+    fp_cor," ")
+
+plot(comm$price,comm$freight_value, xlab = "Item price",
+     ylab = "Freight Value", 
+     main = 'Relationship between the items price and the freight values', 
+     col = 'red')
+
+fw_cor <- round(cor(comm$freight_value, comm$product_weight_g),2)
+cat("The correlation between the freight value and the products weight is", 
+    fw_cor)
+
+plot(comm$product_weight_g,comm$freight_value, xlab = "Product Weight",
+     ylab = "Freight Value", 
+     main = 'Relationship between the freight value and the product weights', 
+     col = 'blue')
+```
+*From the correlation heatmap and the plots and calculations, we can see that there is some probable amount of correlation between the freight values, prices and item's weights.*
+
