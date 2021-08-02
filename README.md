@@ -1,0 +1,2 @@
+# R-Analysis-Brazilian-E-Commerce-Dataset
+For this task, I went ahead and chose the "Brazilian E-Commerce Public Dataset by Olist" dataset from Kaggle: https://www.kaggle.com/olistbr/brazilian-ecommerce. It also suffices the minimum requirement of 2 categorical and 3 numerical variables. I'll perform various types of analysis on the dataset to infer out significant results in the forms of summaries, dataframes, tables and numerous plots. In the end, I'll also demonstrate the correlation between the numeric variables from the dataset.
